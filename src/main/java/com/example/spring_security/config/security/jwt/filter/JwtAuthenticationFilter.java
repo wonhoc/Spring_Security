@@ -47,6 +47,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         Authentication authentication = null;
 
         try {
+
             /* 1. username(email)과 password를 받는다 */
             LoginRequestDto loginDto = om.readValue(req.getInputStream(), LoginRequestDto.class);
 

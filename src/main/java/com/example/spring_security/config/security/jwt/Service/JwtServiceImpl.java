@@ -2,8 +2,11 @@ package com.example.spring_security.config.security.jwt.Service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.example.spring_security.config.security.jwt.JwtProperties;
 import com.example.spring_security.config.security.jwt.dto.LoginDto.LoginResponseDto;
+import com.example.spring_security.config.security.jwt.exception.JwtErrorMessage;
+import com.example.spring_security.config.security.jwt.exception.JwtException;
 import com.example.spring_security.user.domain.User;
 import com.example.spring_security.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +16,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
 /**
@@ -64,7 +70,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     /**
-     * @brief   email을 통해 유저 entity 조회
+     * @brief   email을 통한 유저 entity 조회
      * @param   email
      * @return  LoginResponseDto
      */
@@ -97,7 +103,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     /**
-     * @brief   refreshToken 수정
+     * @brief   accessToken Header에 설정
      * @param   response
      * @param   accessToken
      */
@@ -107,7 +113,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     /**
-     * @brief   response Header영역에 refreshToken 설정
+     * @brief   refreshToken Header에 설정
      * @param   response
      * @param   refreshToken
      */
@@ -140,5 +146,142 @@ public class JwtServiceImpl implements JwtService {
             jObject.put("message", message);
         }
         response.getWriter().print(jObject);
+    }
+
+    /**
+     * @brief   Header에 정상적인 토큰 여부 확인
+     * @param   req
+     * @return  true
+     */
+    @Override
+    public boolean isValidHeaderOrThrow(HttpServletRequest req) {
+
+        String accessToken = req.getHeader(JwtProperties.ACCESS_TOKEN_HEADER);
+
+        String refreshToken = req.getHeader(JwtProperties.REFRESH_TOKEN_HEADER);
+
+        if(accessToken != null
+                && refreshToken != null
+                && accessToken.startsWith(JwtProperties.TOKEN_PREFIX)
+                && refreshToken.startsWith(JwtProperties.TOKEN_PREFIX)){
+            return true;
+        } else {
+            throw new JwtException(JwtErrorMessage.JWT_HEADER_IS_NOT_VALID);
+        }
+    }
+
+    /**
+     * @brief   Access Token 추출
+     * @param   req
+     * @return  accessToken
+     */
+    @Override
+    public String replaceAccessToken(HttpServletRequest req) {
+
+        return req.getHeader(JwtProperties.ACCESS_TOKEN_HEADER).replace(JwtProperties.TOKEN_PREFIX,"");
+    }
+
+    /**
+     * @brief   Refresh Token 추출
+     * @param   req
+     * @return  refreshToken
+     */
+    @Override
+    public String replaceRefreshToken(HttpServletRequest req) {
+
+        return req.getHeader(JwtProperties.REFRESH_TOKEN_HEADER).replace(JwtProperties.TOKEN_PREFIX,"");
+    }
+
+    /**
+     * @brief   토큰을 해석하여 정상 여부 확인
+     * @param   refreshToken
+     * @return  true
+     */
+    @Override
+    public boolean isNotExpiredToken(String refreshToken) {
+        try {
+            JWT.require(Algorithm.HMAC512(SECRET_KEY));
+        } catch (Exception e){
+            throw new JwtException(JwtErrorMessage.JWT_REFRESH_IS_NOT_VALID);
+        }
+        return true;
+    }
+
+    /**
+     * @brief   토큰을 통한 User 조회
+     * @param   refreshToken
+     * @return  loginResponseDto
+     */
+    @Override
+    @Transactional
+    public LoginResponseDto selectByRefreshToken(String refreshToken) {
+
+        User user = userRepository.findByRefreshToken(refreshToken).orElseThrow();
+
+        return LoginResponseDto.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .userRole(user.getUserRole())
+                .build();
+    }
+
+    /**
+     * @brief   토큰의 10경과 여부 확인
+     * @param   refreshToken
+     * @return  true
+     */
+    @Override
+    public boolean checkTokenIsMadeInTendays(String refreshToken) {
+        try {
+            Date expiresDate = JWT.require(Algorithm.HMAC512(SECRET_KEY)).build().verify(refreshToken).getExpiresAt();
+
+            Date currentDate = new Date();
+
+            return expiresDate.before(currentDate) ? true : false;
+        } catch (TokenExpiredException e) {
+            throw new JwtException(JwtErrorMessage.JWT_REFRESH_IS_EXPIRED);
+        } catch (Exception e2) {
+            throw new JwtException(JwtErrorMessage.JWT_REFRESH_IS_NOT_VALID);
+        }
+    }
+
+    /**
+     * @brief   Refresh Token 재설정
+     * @param   email
+     * @param   refreshToken
+     * @return  refreshToken
+     */
+    @Override
+    public String updateRefreshToken(String email, String refreshToken) {
+
+        String newRefreshToken = createRefreshToken();
+
+        User user = userRepository.findByEmail(email).orElseThrow();
+
+        user.updateRefreshToken(newRefreshToken);
+
+        return newRefreshToken;
+    }
+
+    /**
+     * @param   accessToken
+     * @brief   accessToken 확인
+     * @details accessToken의 만료 여부를 확인한다
+     * @return  true
+     */
+    @Override
+    public boolean checkValidToken(String accessToken) {
+        try {
+            JWT.require(Algorithm.HMAC512(SECRET_KEY))
+                    .build()
+                    .verify(accessToken);
+
+            return true;
+        } catch (TokenExpiredException e) {
+            throw new JwtException(JwtErrorMessage.JWT_ACCESS_IS_EXPIRED);
+        } catch (Exception e2) {
+            throw new JwtException(JwtErrorMessage.JWT_ACCESS_IS_NOT_VALID);
+        }
     }
 }

@@ -35,7 +35,6 @@ public class LoginDto {
         private String userRole;
         private SocialType socialType;
 
-        // ENUM으로 안하고 ,로 해서 구분해서 ROLE을 입력 -> 그걸 파싱!!
         public List<String> getRoleList(){
             if(this.userRole.length() > 0){
                 return Arrays.asList(this.userRole.split(","));

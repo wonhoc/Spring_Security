@@ -2,8 +2,10 @@ package com.example.spring_security.config.security.jwt.Service;
 
 import com.example.spring_security.config.security.jwt.dto.LoginDto.LoginResponseDto;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 /**
  * @package     com.example.spring_security.config.security.jwt.Service
@@ -35,4 +37,28 @@ public interface JwtService {
 
     /* responseMessage설정 */
     void setResponseMessage(boolean result, HttpServletResponse response, String message) throws IOException;
+
+    /* Header에 정상적인 토큰여부 확인 */
+    boolean isValidHeaderOrThrow(HttpServletRequest req) throws UnsupportedEncodingException;
+
+    /* Access Token 인증 타입(Bearer) 제거 */
+    String replaceAccessToken(HttpServletRequest req) throws UnsupportedEncodingException;
+
+    /* Refresh Token 인증 타입(Bearer) 제거 */
+    String replaceRefreshToken(HttpServletRequest req) throws UnsupportedEncodingException;
+
+    /* Refresh Token 인증 타입(Bearer) 제거 */
+    boolean isNotExpiredToken(String refreshToken);
+
+    /* Token으로 User객체 조회 */
+    LoginResponseDto selectByRefreshToken(String refreshToken);
+
+    /* Token 발급일로부터 10일 경과 여부 확인 */
+    boolean checkTokenIsMadeInTendays(String refreshToken);
+
+    /* Token 재설정 */
+    String updateRefreshToken(String email, String refreshToken);
+
+    /* Token 확인 */
+    boolean checkValidToken(String accessToken);
 }

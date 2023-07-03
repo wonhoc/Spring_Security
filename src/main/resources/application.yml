@@ -9,7 +9,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
@@ -21,6 +21,13 @@ spring:
           validation:
             mode: none
     show-sql: true
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug
+        type: trace
 
 server:
   port: 8080

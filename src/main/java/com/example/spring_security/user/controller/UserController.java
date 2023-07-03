@@ -34,4 +34,26 @@ public class UserController {
 
         return resultMap;
     }
+
+    @PostMapping("/user/hello")
+    public Map<String, Object> hello() {
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        resultMap.put("resultCode", "200");
+        resultMap.put("resultMessage", "성공적으로 진행되었습니다");
+
+        return resultMap;
+    }
+
+    @PostMapping("/manager/hello")
+    public Map<String, Object> hello2() {
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        resultMap.put("resultCode", "200");
+        resultMap.put("resultMessage", "성공적으로 진행되었습니다");
+
+        return resultMap;
+    }
 }

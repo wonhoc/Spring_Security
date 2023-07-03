@@ -1,6 +1,5 @@
 package com.example.spring_security.config.security.auth;
 
-import com.example.spring_security.config.security.jwt.dto.LoginDto;
 import com.example.spring_security.config.security.jwt.dto.LoginDto.LoginResponseDto;
 import com.example.spring_security.user.domain.User;
 import com.example.spring_security.user.repository.UserRepository;
@@ -17,9 +16,8 @@ import org.springframework.stereotype.Service;
  * @brief   사용자의 정보를 가져오기 위한 비즈니스 로직
  * @author  최원호
  * @date    2023.06.22
- * version  1.0
+ * @version  1.0
  */
-
 @Slf4j
 @Service
 public class PrincipalDetailsService implements UserDetailsService {

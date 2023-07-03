@@ -1,6 +1,5 @@
 package com.example.spring_security.config.security.auth;
 
-import com.example.spring_security.config.security.jwt.dto.LoginDto;
 import com.example.spring_security.config.security.jwt.dto.LoginDto.LoginResponseDto;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
