@@ -1,6 +1,7 @@
 package com.example.spring_security.config.security.jwt.exception;
 
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.access.AuthorizationServiceException;
+
 
 /**
  * @package     com.example.spring_security.config.security.jwt.exception
@@ -9,7 +10,7 @@ import org.springframework.security.core.AuthenticationException;
  * @date        2023.06.22
  * @version     1.0
  */
-public class JwtException extends AuthenticationException {
+public class JwtException extends AuthorizationServiceException {
 
     public JwtException(JwtErrorMessage message) {
         super(message.getMessage());

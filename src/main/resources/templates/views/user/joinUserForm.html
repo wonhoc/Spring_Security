@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultLayout}">
+
+<th:script layout:fragment="script">
+    <script th:src="@{/js/user/joinUserForm.js}"></script>
+</th:script>
+
+<section id="main" class="main container" layout:fragment="content" style="position: relative!important;">
+    <div class="divCenter">
+        <div class="flexColumn">
+
+            <!-- Email -->
+            <div class="form-group">
+                <label class="form-label" for="email">
+                이메일 *
+                </label>
+                <input class="form-control form-control-sm" id="email" type="email" placeholder="이메일을 입력해주세요 *" required>
+            </div>
+
+            <!-- password -->
+            <div class="form-group">
+                <label class="form-label" for="password">
+                    비밀번호 *
+                </label>
+                <input class="form-control form-control-sm" id="password" type="password" placeholder="비밀번호를 입력해주세요 *" required>
+            </div>
+
+            <!-- rePassword -->
+            <div class="form-group">
+                <label class="form-label" for="rePassword">
+                    다시한번 입력해주세요 *
+                </label>
+                <input class="form-control form-control-sm" id="rePassword" type="password" placeholder="다시한번 입력해주세요 *" required>
+            </div>
+
+            <!-- phone -->
+            <div class="form-group">
+                <label class="form-label" for="phoneNumber">
+                    휴대폰 번호 *
+                </label>
+                <input class="form-control form-control-sm" id="phoneNumber" type="text" required>
+            </div>
+
+            <!-- rePassword -->
+            <div class="form-group">
+                <label class="form-label" for="nickname">
+                    닉네임을 입력해주세요 *
+                </label>
+                <input class="form-control form-control-sm" id="nickname" type="text" placeholder="닉네임을 입력해주세요 *" required>
+            </div>
+
+            <button id="joinBtn" class="btn btn-sm w-100 btn-outline-dark">시작하기</button>
+
+        </div>
+    </div>
+</section>
+</html>

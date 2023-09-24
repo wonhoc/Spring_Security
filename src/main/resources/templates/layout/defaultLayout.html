@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="ko">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <th:block th:replace="config :: configFragment"></th:block>
+</head>
+
+<body>
+<header th:insert="fragments/header.html"></header>
+
+<main style="padding-top: 107px!important;">
+    <section layout:fragment="content"></section>
+</main>
+
+<footer th:insert="fragments/footer.html"></footer>
+</body>
+</html>

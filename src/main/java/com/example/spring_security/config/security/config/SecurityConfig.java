@@ -6,6 +6,9 @@ import com.example.spring_security.config.security.jwt.exception.AuthenticationE
 import com.example.spring_security.config.security.jwt.filter.BeforeFilter;
 import com.example.spring_security.config.security.jwt.filter.JwtAuthenticationFilter;
 import com.example.spring_security.config.security.jwt.filter.JwtAuthorizationFilter;
+import com.example.spring_security.config.security.oAuth2.handler.AuthenticationFailureHandlerImpl;
+import com.example.spring_security.config.security.oAuth2.handler.AuthenticationSuccessHandlerImpl;
+import com.example.spring_security.config.security.oAuth2.service.OAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -41,6 +44,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AccessDeniedHandlerImpl accessDeniedHandlerImpl;
 
+    private final AuthenticationSuccessHandlerImpl authenticationSuccessHandler;
+
+    private final AuthenticationFailureHandlerImpl authenticationFailureHandler;
+
+    private final OAuth2UserServiceImpl oAuth2UserService;
+
     @Override
     public void configure(WebSecurity web) {
         web.ignoring().mvcMatchers( "/", "/common/**");
@@ -68,7 +77,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPointImpl)
-                .accessDeniedHandler(accessDeniedHandlerImpl);
+                .accessDeniedHandler(accessDeniedHandlerImpl)
+
+                .and()
+                .oauth2Login()
+                .successHandler(authenticationSuccessHandler)
+                .failureHandler(authenticationFailureHandler)
+                .userInfoEndpoint().userService(oAuth2UserService); // customUserService 설정;
 
     }
 

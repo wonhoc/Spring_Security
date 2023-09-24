@@ -3,13 +3,12 @@ package com.example.spring_security.config.security.jwt.filter;
 import com.example.spring_security.config.security.auth.PrincipalDetails;
 import com.example.spring_security.config.security.jwt.JwtProperties;
 import com.example.spring_security.config.security.jwt.Service.JwtService;
-import com.example.spring_security.config.security.jwt.dto.LoginDto;
 import com.example.spring_security.config.security.jwt.dto.LoginDto.LoginResponseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -57,25 +56,27 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 String accessToken = jwtService.replaceAccessToken(req);
                 String refreshToken = jwtService.replaceRefreshToken(req);
 
-
-                // 만료된 리프레쉬 토큰은 재로그인
-                if (jwtService.isNotExpiredToken(refreshToken)) {
+                // 만료된 리프레쉬 토큰은 재로그인 필요
+                if (jwtService.isNotExpiredRefreshToken(refreshToken)) {
 
                     LoginResponseDto userDto = jwtService.selectByRefreshToken(refreshToken);
-                    log.info(userDto.getEmail());
+
+                    // 엑세스 토큰이 만료된 경우 새로
+                    if (!jwtService.isNotExpiredAccessToken(accessToken)) {
+
+                        log.info("The Token had been expired");
+
+                        String reissuedAccessToken = jwtService.createAccessToken(userDto.getEmail());
+                        jwtService.setAccessTokenToHeader(res, reissuedAccessToken);
+                    }
 
                     // 리프레쉬 토큰이 10일 이내 만료일 경우 새로 발급
                     if (jwtService.checkTokenIsMadeInTendays(refreshToken)) {
 
+                        log.info("** It has been 10 days since token was made **");
+
                         refreshToken = jwtService.updateRefreshToken(userDto.getEmail(), refreshToken);
                         jwtService.setRefreshTokenToHeader(res, refreshToken);
-                    }
-
-                    // 엑세스 토큰이 만료된 경우 새로 발급
-                    if (jwtService.checkValidToken(accessToken)) {
-
-                        String reissuedAccessToken = jwtService.createAccessToken(userDto.getEmail());
-                        jwtService.setAccessTokenToHeader(res, reissuedAccessToken);
                     }
 
                     PrincipalDetails principal = new PrincipalDetails(userDto);
@@ -86,9 +87,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 }
 
             } else {
-                log.info("[LOGIN] > 재 로그인 필요");
+                log.error("[LOGIN] > 재 로그인 필요");
             }
-        } catch (AuthenticationException e){
+        } catch (AuthorizationServiceException e){
             log.info("******************************************************************");
             log.info("인가 에러>>>>>>>>>>>>>>>>>>"+e.getMessage());
             log.info("******************************************************************");

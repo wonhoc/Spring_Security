@@ -47,8 +47,11 @@ public interface JwtService {
     /* Refresh Token 인증 타입(Bearer) 제거 */
     String replaceRefreshToken(HttpServletRequest req) throws UnsupportedEncodingException;
 
-    /* Refresh Token 인증 타입(Bearer) 제거 */
-    boolean isNotExpiredToken(String refreshToken);
+    /* 토큰을 해석하여 정상 여부 확인 */
+    boolean isNotExpiredRefreshToken(String refreshToken);
+
+    /* Token 확인 */
+    boolean isNotExpiredAccessToken(String accessToken);
 
     /* Token으로 User객체 조회 */
     LoginResponseDto selectByRefreshToken(String refreshToken);
@@ -59,6 +62,4 @@ public interface JwtService {
     /* Token 재설정 */
     String updateRefreshToken(String email, String refreshToken);
 
-    /* Token 확인 */
-    boolean checkValidToken(String accessToken);
 }

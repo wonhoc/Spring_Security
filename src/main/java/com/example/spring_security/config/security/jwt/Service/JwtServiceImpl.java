@@ -156,14 +156,19 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public boolean isValidHeaderOrThrow(HttpServletRequest req) {
 
-        String accessToken = req.getHeader(JwtProperties.ACCESS_TOKEN_HEADER);
+        log.info("** Check whether there is token in header **");
 
+        String accessToken = req.getHeader(JwtProperties.ACCESS_TOKEN_HEADER);
         String refreshToken = req.getHeader(JwtProperties.REFRESH_TOKEN_HEADER);
+
+        log.info(accessToken + " IS accessToken");
+        log.info(refreshToken + " IS refreshToken");
 
         if(accessToken != null
                 && refreshToken != null
                 && accessToken.startsWith(JwtProperties.TOKEN_PREFIX)
                 && refreshToken.startsWith(JwtProperties.TOKEN_PREFIX)){
+
             return true;
         } else {
             throw new JwtException(JwtErrorMessage.JWT_HEADER_IS_NOT_VALID);
@@ -198,13 +203,42 @@ public class JwtServiceImpl implements JwtService {
      * @return  true
      */
     @Override
-    public boolean isNotExpiredToken(String refreshToken) {
+    public boolean isNotExpiredRefreshToken(String refreshToken) {
         try {
-            JWT.require(Algorithm.HMAC512(SECRET_KEY));
+            log.info("** check the refresh token **");
+
+            JWT.require(Algorithm.HMAC512(SECRET_KEY))
+                    .build()
+                    .verify(refreshToken);
         } catch (Exception e){
+
             throw new JwtException(JwtErrorMessage.JWT_REFRESH_IS_NOT_VALID);
         }
         return true;
+    }
+
+    /**
+     * @param   accessToken
+     * @brief   accessToken 확인
+     * @details accessToken의 만료 여부를 확인한다
+     * @return  true
+     */
+    @Override
+    public boolean isNotExpiredAccessToken(String accessToken) {
+        try {
+
+            log.info("** check the access token **");
+
+            JWT.require(Algorithm.HMAC512(SECRET_KEY))
+                    .build()
+                    .verify(accessToken);
+
+            return true;
+        } catch (TokenExpiredException e) {
+            throw new JwtException(JwtErrorMessage.JWT_ACCESS_IS_EXPIRED);
+        } catch (Exception e2) {
+            throw new JwtException(JwtErrorMessage.JWT_ACCESS_IS_NOT_VALID);
+        }
     }
 
     /**
@@ -253,6 +287,7 @@ public class JwtServiceImpl implements JwtService {
      * @return  refreshToken
      */
     @Override
+    @Transactional
     public String updateRefreshToken(String email, String refreshToken) {
 
         String newRefreshToken = createRefreshToken();
@@ -262,26 +297,5 @@ public class JwtServiceImpl implements JwtService {
         user.updateRefreshToken(newRefreshToken);
 
         return newRefreshToken;
-    }
-
-    /**
-     * @param   accessToken
-     * @brief   accessToken 확인
-     * @details accessToken의 만료 여부를 확인한다
-     * @return  true
-     */
-    @Override
-    public boolean checkValidToken(String accessToken) {
-        try {
-            JWT.require(Algorithm.HMAC512(SECRET_KEY))
-                    .build()
-                    .verify(accessToken);
-
-            return true;
-        } catch (TokenExpiredException e) {
-            throw new JwtException(JwtErrorMessage.JWT_ACCESS_IS_EXPIRED);
-        } catch (Exception e2) {
-            throw new JwtException(JwtErrorMessage.JWT_ACCESS_IS_NOT_VALID);
-        }
     }
 }

@@ -65,6 +65,21 @@ public class User {
     }
 
     /**
+     * @brief   profileUrl 재설정
+     * @param   profileUrl 프로필사진 URL
+     */
+    public void updateProfileUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
+    }
+    /**
+     * @brief   nickname 재설정
+     * @param   nickname 닉네임
+     */
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    /**
      * @brief   비밀번호 암호화 메서드
      * @param   passwordEncoder    패스워드 암호 클래스
      */

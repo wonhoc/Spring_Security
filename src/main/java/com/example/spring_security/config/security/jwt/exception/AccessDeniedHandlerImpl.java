@@ -36,6 +36,6 @@ public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
 
         log.error("권한 오류");
-        jwtService.setResponseMessage(false, response, accessDeniedException.getMessage());
+        jwtService.setResponseMessage(false, response, "권한 오류");
     }
 }

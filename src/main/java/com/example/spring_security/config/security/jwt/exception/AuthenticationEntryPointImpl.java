@@ -32,6 +32,7 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
 
         String errorMessage = (String) request.getAttribute(JwtProperties.Exception);
+
         log.error("authException message: " + authException.getMessage());
         jwtService.setResponseMessage(false, response, errorMessage);
     }
